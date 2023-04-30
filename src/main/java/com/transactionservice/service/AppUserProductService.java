@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AppUserProductService implements IAppUserProductService {
@@ -42,5 +43,34 @@ public class AppUserProductService implements IAppUserProductService {
                     appUserProductDto.setProductList(tuple.getT2());
                     return appUserProductDto;
                 });
+    }
+
+    @Override
+    public AppUser updateCommonAppUser(AppUser updateAppUser, String id) {
+        appUserDao.updateEntity(updateAppUser);
+        AppUser appUser = appUserDao.getUserByUserName(updateAppUser.getUsername()).get();
+        return appUser;
+    }
+
+    @Override
+    public AppUser updateCommonAppUserPatch(Map<String, Object> updateAppUser, String id) {
+        AppUser appUser = setupAppUser(updateAppUser, id);
+        appUserDao.updateEntity(appUser);
+        AppUser getAppUser = appUserDao.getUserByUserName(appUser.getUsername()).get();
+        return getAppUser;
+    }
+
+    private AppUser setupAppUser(Map<String, Object> updateAppUser, String id) {
+        AppUser appUser = new AppUser();
+        appUser.setId(Long.parseLong(id));
+        appUser.setUsername((String) updateAppUser.get("username"));
+        appUser.setPassword((String) updateAppUser.get("password"));
+        appUser.setEmail((String) updateAppUser.get("email"));
+        appUser.setRole(null);
+        appUser.setUserAddress(null);
+        appUser.setUserDetails(null);
+        appUser.setBucket(null);
+
+        return appUser;
     }
 }
